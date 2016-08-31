@@ -1,0 +1,7 @@
+setup.py
+sqlgen.py
+SqlGen.egg-info/PKG-INFO
+SqlGen.egg-info/SOURCES.txt
+SqlGen.egg-info/dependency_links.txt
+SqlGen.egg-info/requires.txt
+SqlGen.egg-info/top_level.txt
