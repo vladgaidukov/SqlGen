@@ -141,7 +141,11 @@ class SqlGen:
             return {'status': 'error', 'message': traceback.format_exc()}
 			
     def getTableData(self, table, param=None, order=None):
-        data = self.select(table, param=param or [], order={'poryad':'desc'} or order)['data']
+        data = self.select(table, param=param or [], order={'poryad':'desc'} or order)
+        if (data['status']=='error'):
+            return data
+        else:
+            data = data['data']
         tmpTable = ''
         joindata = {}
         if isinstance(data, list) and len(data) > 0:
@@ -168,3 +172,4 @@ class SqlGen:
     def sql_custom(self, script):
         self.checkConn()
         self.cursor.execute(script, multi=True)
+        self.cnx.commit()
