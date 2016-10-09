@@ -8,16 +8,17 @@ class SqlGen:
         try:
             self.scripts = {}
             self.tables = []
-            self.connect(config)
+            self.config = config
+            self.connect()
         except:
             traceback.print_exc()
             
-    def connect(self,config):
+    def connect(self):
         try:
-            self.cnx = mysql.connector.connect(user=config['user'],
-                                               password=config['password'],
-                                               host=config['host'],
-                                               database=config['database'],
+            self.cnx = mysql.connector.connect(user=self.config['user'],
+                                               password=self.config['password'],
+                                               host=self.config['host'],
+                                               database=self.config['database'],
                                                buffered=True)
             self.cursor = self.cnx.cursor()
             self._generate_scripts()
