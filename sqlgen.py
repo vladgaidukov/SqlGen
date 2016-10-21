@@ -18,8 +18,8 @@ class SqlGen:
             self.cnx = mysql.connector.connect(user=self.config['user'],
                                                password=self.config['password'],
                                                host=self.config['host'],
-                                               database=self.config['database'],
-                                               buffered=True)
+                                               database=self.config['database'])
+            self.cnx.start_transaction(isolation_level='READ COMMITTED')
             self.cursor = self.cnx.cursor()
             self._generate_scripts()
         except:
