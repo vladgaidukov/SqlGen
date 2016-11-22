@@ -37,13 +37,13 @@ con.getTableData('category', param={'record_status_recid':1})
 
 {'status':'success',
   'data': [
- {'record_status_recid': {'name': 'Одобрен', 'recid': 1}, 
+ {'record_status_recid': {'name': 'Enabled', 'recid': 1}, 
     'name': 'Test',
     'recid': 1}, 
- {'record_status_recid': {'name': 'Одобрен', 'recid': 1}, 
+ {'record_status_recid': {'name': 'Enabled', 'recid': 1}, 
    'name': 'Test22', 
    'recid': 2}, 
- {'record_status_recid': {'name': 'Одобрен', 'recid': 1}, 
+ {'record_status_recid': {'name': 'Enabled', 'recid': 1}, 
    'name': 'Test3', 
    'recid': 3}
 ]}
