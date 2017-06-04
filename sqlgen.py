@@ -1,9 +1,10 @@
 import mysql.connector
 import traceback
+import datetime
 
 DB_TABLE_INDEX = 'recid'
 
-class SqlGen:
+class SqlG:
     def __init__(self,config):
         try:
             self.scripts = {}
@@ -19,7 +20,6 @@ class SqlGen:
                                                password=self.config['password'],
                                                host=self.config['host'],
                                                database=self.config['database'])
-            self.cnx.start_transaction(isolation_level='READ COMMITTED')
             self.cursor = self.cnx.cursor()
             self._generate_scripts()
         except:
@@ -75,22 +75,24 @@ class SqlGen:
                 string = self.scripts[table]['select'] + string
                 if order:
                     string = string  + ', '.join([' order by ' + str(o) + ' ' + order[o] for o in order if o in self.scripts[table]['columns']])
+                self.cnx.commit()
                 self.cursor.execute(string, values)
                 res = self.cursor.fetchall()
                 hres = []
                 for rec in res:
                     hres.append({col:rec[self.scripts[table]['columns'].index(col)] for col in self.scripts[table]['columns']})
-                return {'status':'success', 'data':hres}
+                return hres if len(hres) > 0 else None
             else:
-                return {'status': 'error', 'message': 'Таблица не существует'}
+                return None
         except:
             traceback.print_exc()
-            return {'status': 'error', 'message': traceback.format_exc()}
+            return None
 
     def update(self, table, columns={}, param={}):
         try:
             self.checkConn()
             if table in self.scripts:
+                columns['update_date'] = int(datetime.datetime.now().timestamp())
                 string = ' where 1=1'
                 values = []
                 tmpstring = ''
@@ -109,17 +111,20 @@ class SqlGen:
                         values.append(param[p])
                 self.cursor.execute(self.scripts[table]['update'] + string, values)
                 self.cnx.commit()
-                return {'status':'success'}
+                data = self.select(table, param)
+                return data[0] if data else None
             else:
                 return False
         except:
             traceback.print_exc()
-            return {'status': 'error', 'message': traceback.format_exc()}
+            return None
 
     def insert(self, table, columns={}):
         try:
+            checked_columns = {}
             self.checkConn()
             if table in self.scripts:
+                columns['create_date'] = int(datetime.datetime.now().timestamp())
                 values = []
                 tmpstring = ' ('
                 string = ''
@@ -129,17 +134,20 @@ class SqlGen:
                     if c in self.scripts[table]['columns']:
                         tmpstring = tmpstring + c + ','
                         values.append(columns[c])
+                        checked_columns[c] = columns[c]
+                columns = checked_columns
                 tmpstring = tmpstring[:-1] + ')'
                 string = tmpstring + string
-                string = string + ' values (%s)' % (', '.join(['%s' for el in columns]))
+                string = string + ' values (%s)' % (', '.join(['%s' for el in columns if el in self.scripts[table]['columns']]))
                 self.cursor.execute(self.scripts[table]['insert'] + string, values)
                 self.cnx.commit()
-                return {'status':'success'}
+                data = self.select(table, columns)
+                return data[0] if data else None
             else:
                 return False
         except:
             traceback.print_exc()
-            return {'status': 'error', 'message': traceback.format_exc()}
+            return None
 			
     def getTableData(self, table, param=None, order=None):
         data = self.select(table, param=param or [], order={'poryad':'desc'} or order)
